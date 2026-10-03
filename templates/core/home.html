@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}
+    LinkUp — Головна
+{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+
+    <h1>
+        Ласкаво просимо до LinkUp
+    </h1>
+
+    <p>
+        Спілкуйся. Ділись. Знаходь своїх.
+    </p>
+
+    {% if not user.is_authenticated %}
+
+        <div class="buttons">
+
+            <a
+                href="{% url 'register' %}"
+                class="button"
+            >
+                Створити акаунт
+            </a>
+
+            <a
+                href="{% url 'login' %}"
+                class="button secondary"
+            >
+                Увійти
+            </a>
+
+        </div>
+
+    {% else %}
+
+        <h2>
+            Привіт, {{ user.username }}!
+        </h2>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Реєстрація — LinkUp
+{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h1>Створення акаунта</h1>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Зареєструватися
+        </button>
+
+    </form>
+
+    <p>
+        Вже маєте акаунт?
+
+        <a href="{% url 'login' %}">
+            Увійти
+        </a>
+    </p>
+
+</div>
+
+{% endblock %}

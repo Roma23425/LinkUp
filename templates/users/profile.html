@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Профіль — {{ profile_user.username }}
+{% endblock %}
+
+{% block content %}
+
+<div class="profile">
+
+    {% if profile_user.avatar %}
+
+        <img
+            src="{{ profile_user.avatar.url }}"
+            alt="Avatar"
+            class="avatar"
+        >
+
+    {% endif %}
+
+    <h1>
+        {{ profile_user.username }}
+    </h1>
+
+    <p>
+        {{ profile_user.first_name }}
+        {{ profile_user.last_name }}
+    </p>
+
+    <p>
+        {{ profile_user.bio }}
+    </p>
+
+    <a
+        href="{% url 'edit_profile' %}"
+        class="button"
+    >
+        Редагувати профіль
+    </a>
+
+</div>
+
+{% endblock %}
