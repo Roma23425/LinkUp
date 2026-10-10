@@ -26,6 +26,7 @@
 </head>
 
 <body>
+    
 
 <header class="header">
 
@@ -41,9 +42,10 @@
                 Профіль
             </a>
 
-            <a href="{% url 'logout' %}">
-                Вийти
-            </a>
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link">Вийти</button>
+            </form>
 
         {% else %}
 
