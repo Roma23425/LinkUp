@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}LinkUp{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="{% url 'home' %}"><span class="logo-mark">L</span>LinkUp</a>
+
+  <form class="search" action="#" method="get" role="search">
+    <input type="search" name="q" placeholder="Шукати людей, групи, публікації" aria-label="Пошук">
+  </form>
+
+  <nav class="topbar-actions">
+    {% if user.is_authenticated %}
+      <a class="icon-btn" href="#" aria-label="Повідомлення">✉</a>
+      <a class="icon-btn" href="#" aria-label="Сповіщення">🔔</a>
+      <a class="me" href="{% url 'profile' %}">
+        {% if user.avatar %}<img src="{{ user.avatar.url }}" alt="">{% else %}<span class="ava">{{ user.username|slice:":1"|upper }}</span>{% endif %}
+        <span class="me-name">{{ user.username }}</span>
+      </a>
+      <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button class="btn btn-ghost" type="submit">Вийти</button>
+      </form>
+    {% else %}
+      <a class="btn btn-ghost" href="{% url 'login' %}">Увійти</a>
+      <a class="btn btn-primary" href="{% url 'register' %}">Зареєструватися</a>
+    {% endif %}
+  </nav>
+</header>
+
+{% if messages %}
+<div class="messages">
+  {% for message in messages %}
+    <div class="message {{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+{% if user.is_authenticated %}
+<nav class="tabbar">
+  <a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Стрічка</a>
+  <a href="#">Групи</a>
+  <a href="#">Чати</a>
+  <a href="#">Сповіщення</a>
+</nav>
+{% endif %}
+
+</body>
+</html>

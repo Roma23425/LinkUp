@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Публікація — LinkUp{% endblock %}
+
+{% block content %}
+<div class="detail">
+  {% include "posts/_post_card.html" %}
+
+  <section class="card comments" id="comments">
+    <h3>Коментарі ({{ comments|length }})</h3>
+
+    {% for c in comments %}
+    <div class="comment">
+      {% if c.author.avatar %}<img class="ava" src="{{ c.author.avatar.url }}" alt="">{% else %}<span class="ava">{{ c.author.username|slice:":1"|upper }}</span>{% endif %}
+      <div>
+        <strong>{{ c.author.username }}</strong>
+        <span class="muted">{{ c.created_at|timesince }} тому</span>
+        <p>{{ c.text|linebreaksbr }}</p>
+      </div>
+    </div>
+    {% empty %}
+    <p class="muted">Коментарів ще немає. Напишіть перший.</p>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'comment_add' post.id %}" class="comment-form">
+      {% csrf_token %}
+      {{ comment_form.text }}
+      <button class="btn btn-primary" type="submit">Надіслати</button>
+    </form>
+    {% else %}
+    <p class="muted"><a href="{% url 'login' %}">Увійдіть</a>, щоб коментувати.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

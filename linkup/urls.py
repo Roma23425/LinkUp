@@ -37,7 +37,13 @@ urlpatterns = [
         "",
         include("core.urls")
     ),
+
+    path(
+        "posts/",
+        include("posts.urls")),
 ]
+
+
 
 
 if settings.DEBUG:
