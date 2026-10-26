@@ -1,0 +1,179 @@
+<article class="card post-card">
+
+    <!-- Автор публікації -->
+    <div class="post-header">
+        <a class="post-author" href="{% url 'post_detail' post.id %}">
+            {% if post.author.avatar %}
+                <img class="ava"
+                     src="{{ post.author.avatar.url }}"
+                     alt="{{ post.author.username }}">
+            {% else %}
+                <span class="ava">
+                    {{ post.author.username|slice:":1"|upper }}
+                </span>
+            {% endif %}
+
+            <div class="post-author-info">
+                <strong>{{ post.author.username }}</strong>
+                <span class="muted">{{ post.created_at|timesince }} тому</span>
+            </div>
+        </a>
+
+        {% if user.is_authenticated %}
+            {% if post.author_id == user.id or user.is_staff %}
+                <form method="post"
+                      action="{% url 'post_delete' post.id %}"
+                      onsubmit="return confirm('Видалити публікацію?');">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="post-delete-btn"
+                            title="Видалити">
+                        🗑️
+                    </button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- Текст -->
+    {% if post.text %}
+        <div class="post-text">
+            {{ post.text|linebreaksbr }}
+        </div>
+    {% endif %}
+
+    <!-- Поширена публікація -->
+    {% if post.shared_from %}
+        <div class="shared-post">
+
+            <div class="shared-post-header">
+                {% if post.shared_from.author.avatar %}
+                    <img class="ava"
+                         src="{{ post.shared_from.author.avatar.url }}"
+                         alt="{{ post.shared_from.author.username }}">
+                {% else %}
+                    <span class="ava">
+                        {{ post.shared_from.author.username|slice:":1"|upper }}
+                    </span>
+                {% endif %}
+
+                <div class="post-author-info">
+                    <strong>{{ post.shared_from.author.username }}</strong>
+                    <span class="muted">
+                        {{ post.shared_from.created_at|timesince }} тому
+                    </span>
+                </div>
+            </div>
+
+            {% if post.shared_from.text %}
+                <p>{{ post.shared_from.text|linebreaksbr }}</p>
+            {% endif %}
+
+            {% if post.shared_from.image %}
+                <img class="post-image"
+                     src="{{ post.shared_from.image.url }}"
+                     alt="Фото публікації">
+            {% endif %}
+
+            {% if post.shared_from.video %}
+                <video class="post-video" controls preload="metadata">
+                    <source src="{{ post.shared_from.video.url }}">
+                    Ваш браузер не підтримує відео.
+                </video>
+            {% endif %}
+
+            {% if post.shared_from.link %}
+                <a href="{{ post.shared_from.link }}"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    🔗 Відкрити посилання
+                </a>
+            {% endif %}
+
+            <a href="{% url 'post_detail' post.shared_from.id %}">
+                Переглянути оригінал →
+            </a>
+        </div>
+
+    {% else %}
+
+        <!-- Фото -->
+        {% if post.image %}
+            <img class="post-image"
+                 src="{{ post.image.url }}"
+                 alt="Фото публікації"
+                 loading="lazy">
+        {% endif %}
+
+        <!-- Відео -->
+        {% if post.video %}
+            <video class="post-video" controls preload="metadata">
+                <source src="{{ post.video.url }}">
+                Ваш браузер не підтримує відео.
+            </video>
+        {% endif %}
+
+        <!-- Посилання -->
+        {% if post.link %}
+            <a class="post-link"
+               href="{{ post.link }}"
+               target="_blank"
+               rel="noopener noreferrer">
+                🔗 {{ post.link }}
+            </a>
+        {% endif %}
+
+    {% endif %}
+
+    <!-- Статистика -->
+    <div class="post-stats">
+        <span>❤️ {{ post.likes.count }}</span>
+        <a href="{% url 'post_detail' post.id %}#comments">
+            💬 {{ post.comments.count }}
+        </a>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="post-actions">
+
+        {% if user.is_authenticated %}
+            <form method="post"
+                  action="{% url 'post_like' post.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="post-action-btn {% if post.id in liked_ids %}liked{% endif %}">
+                    {% if post.id in liked_ids %}
+                        ❤️ Подобається
+                    {% else %}
+                        🤍 Подобається
+                    {% endif %}
+                </button>
+            </form>
+        {% else %}
+            <a class="post-action-btn" href="{% url 'login' %}">
+                🤍 Подобається
+            </a>
+        {% endif %}
+
+        <a class="post-action-btn"
+           href="{% url 'post_detail' post.id %}#comments">
+            💬 Коментувати
+        </a>
+
+        {% if user.is_authenticated %}
+            <form method="post"
+                  action="{% url 'post_share' post.id %}">
+                {% csrf_token %}
+                <button type="submit" class="post-action-btn">
+                    🔁 Поширити
+                </button>
+            </form>
+        {% else %}
+            <a class="post-action-btn" href="{% url 'login' %}">
+                🔁 Поширити
+            </a>
+        {% endif %}
+
+    </div>
+
+</article>

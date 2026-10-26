@@ -89,3 +89,20 @@ def post_delete(request, pk):
     post.delete()
     messages.success(request, "Публікацію видалено.")
     return redirect("home")
+
+
+def post_list(request):
+    posts = (
+        Post.objects
+        .select_related("author", "shared_from", "shared_from__author")
+        .prefetch_related("likes", "comments")
+        .order_by("-created_at")
+    )
+
+    liked_ids = liked_ids_for(request.user)
+
+    return render(request, "posts/post_list.html", {
+        "posts": posts,
+        "post_form": PostForm() if request.user.is_authenticated else None,
+        "liked_ids": liked_ids,
+    })
