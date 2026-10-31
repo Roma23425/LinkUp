@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_content.html" %}
 {% load static %}
 
 {% block title %}Стрічка — LinkUp{% endblock %}
@@ -6,209 +6,139 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/post_list.css' %}">
 
-<div class="lu-layout">
 
-    <aside class="lu-sidebar">
-        <nav class="lu-navigation">
-            <a href="/" class="lu-nav active">▤ Стрічка</a>
-            <a href="#" class="lu-nav">♧ Друзі та підписки</a>
-            <a href="#" class="lu-nav">◎ Групи</a>
-            <a href="#" class="lu-nav">✉ Повідомлення</a>
-            <a href="#" class="lu-nav">♢ Сповіщення</a>
-            <a href="#" class="lu-nav">☆ Відгуки</a>
-            {% if user.is_staff %}
-                <a href="/admin/" class="lu-nav">⚙ Адмін-панель</a>
+
+
+
+{% for post in posts %}
+<article class="lu-post">
+
+    {% if post.shared_from %}
+        <div class="lu-shared-label">↗ Поширена публікація</div>
+    {% endif %}
+
+    <header class="lu-post-header">
+        <div class="lu-avatar">
+            {{ post.author.username|first|upper|default:"L" }}
+        </div>
+
+        <div class="lu-author-info">
+            <strong>{{ post.author.username }}</strong>
+            <span>{{ post.created_at|date:"d.m.Y, H:i" }}</span>
+        </div>
+
+        {% if user.is_authenticated %}
+            {% if user == post.author or user.is_staff %}
+                <form action="{% url 'post_delete' post.pk %}"
+                        method="post"
+                        class="lu-delete-form"
+                        onsubmit="return confirm('Видалити публікацію?')">
+                    {% csrf_token %}
+                    <button class="lu-more" type="submit"
+                            title="Видалити">⋯</button>
+                </form>
             {% endif %}
-        </nav>
-    </aside>
+        {% endif %}
+    </header>
 
-    <main class="lu-feed">
+    {% if post.shared_from %}
+        <div class="lu-shared-content">
+            <strong>{{ post.shared_from.author.username }}</strong>
+            <div>{{ post.shared_from.text|linebreaks }}</div>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="lu-message">{{ message }}</div>
-            {% endfor %}
+            {% if post.shared_from.image %}
+                <img src="{{ post.shared_from.image.url }}"
+                        alt="Фото поширеної публікації">
+            {% endif %}
+
+            {% if post.shared_from.link %}
+                <a href="{{ post.shared_from.link }}"
+                    target="_blank" rel="noopener noreferrer">
+                    {{ post.shared_from.link }}
+                </a>
+            {% endif %}
+        </div>
+    {% else %}
+        {% if post.text %}
+            <div class="lu-post-text">
+                {{ post.text|linebreaks }}
+            </div>
         {% endif %}
 
-        <section class="lu-create">
-            <div class="lu-avatar">
-                {{ user.username|first|upper|default:"L" }}
+        {% if post.image %}
+            <div class="lu-media">
+                <img src="{{ post.image.url }}"
+                        alt="Фото публікації">
             </div>
-            <div class="lu-create-body">
-                <h3>Що нового?</h3>
-                <p>Поділися думками, фотографіями та відео.</p>
+        {% endif %}
 
-                {% if user.is_authenticated %}
-                    {% if post_form %}
-                        <form action="{% url 'post_create' %}"
-                              method="post"
-                              enctype="multipart/form-data">
-                            {% csrf_token %}
-                            {{ post_form.as_p }}
-                            <button class="lu-primary" type="submit">
-                                Опублікувати
-                            </button>
-                        </form>
-                    {% else %}
-                        <p class="lu-hint">
-                            Форма публікації тут з'явиться, коли головна
-                            сторінка передаватиме post_form.
-                        </p>
-                    {% endif %}
-                {% else %}
-                    <p>Увійди в акаунт, щоб створювати публікації.</p>
-                {% endif %}
+        {% if post.video %}
+            <div class="lu-media">
+                <video controls preload="metadata">
+                    <source src="{{ post.video.url }}">
+                    Твій браузер не підтримує відео.
+                </video>
             </div>
-        </section>
+        {% endif %}
 
-        {% for post in posts %}
-        <article class="lu-post">
+        {% if post.link %}
+            <a class="lu-post-link"
+                href="{{ post.link }}"
+                target="_blank"
+                rel="noopener noreferrer">
+                🔗 {{ post.link }}
+            </a>
+        {% endif %}
+    {% endif %}
 
-            {% if post.shared_from %}
-                <div class="lu-shared-label">↗ Поширена публікація</div>
-            {% endif %}
+    <div class="lu-statistics">
+        <span>💙 {{ post.likes.count }} вподобань</span>
+        <a href="{% url 'post_detail' post.pk %}">
+            💬 {{ post.comments.count }} коментарів
+        </a>
+    </div>
 
-            <header class="lu-post-header">
-                <div class="lu-avatar">
-                    {{ post.author.username|first|upper|default:"L" }}
-                </div>
+    <div class="lu-actions">
+        {% if user.is_authenticated %}
+            <form action="{% url 'post_like' post.pk %}"
+                    method="post">
+                {% csrf_token %}
+                <button class="lu-action" type="submit">
+                    ♡ Подобається
+                </button>
+            </form>
 
-                <div class="lu-author-info">
-                    <strong>{{ post.author.username }}</strong>
-                    <span>{{ post.created_at|date:"d.m.Y, H:i" }}</span>
-                </div>
+            <a class="lu-action"
+                href="{% url 'post_detail' post.pk %}">
+                💬 Коментувати
+            </a>
 
-                {% if user.is_authenticated %}
-                    {% if user == post.author or user.is_staff %}
-                        <form action="{% url 'post_delete' post.pk %}"
-                              method="post"
-                              class="lu-delete-form"
-                              onsubmit="return confirm('Видалити публікацію?')">
-                            {% csrf_token %}
-                            <button class="lu-more" type="submit"
-                                    title="Видалити">⋯</button>
-                        </form>
-                    {% endif %}
-                {% endif %}
-            </header>
+            <form action="{% url 'post_share' post.pk %}"
+                    method="post">
+                {% csrf_token %}
+                <button class="lu-action" type="submit">
+                    ↗ Поширити
+                </button>
+            </form>
+        {% else %}
+            <a class="lu-action"
+                href="{% url 'post_detail' post.pk %}">
+                Переглянути пост
+            </a>
+        {% endif %}
+    </div>
 
-            {% if post.shared_from %}
-                <div class="lu-shared-content">
-                    <strong>{{ post.shared_from.author.username }}</strong>
-                    <div>{{ post.shared_from.text|linebreaks }}</div>
+</article>
+{% empty %}
+    <section class="lu-empty">
+        <div class="lu-empty-icon">💬</div>
+        <h2>Тут поки порожньо</h2>
+        <p>
+            Опублікуй перший пост або додай друзів,
+            щоб побачити їхні публікації.
+        </p>
+    </section>
+{% endfor %}
 
-                    {% if post.shared_from.image %}
-                        <img src="{{ post.shared_from.image.url }}"
-                             alt="Фото поширеної публікації">
-                    {% endif %}
 
-                    {% if post.shared_from.link %}
-                        <a href="{{ post.shared_from.link }}"
-                           target="_blank" rel="noopener noreferrer">
-                            {{ post.shared_from.link }}
-                        </a>
-                    {% endif %}
-                </div>
-            {% else %}
-                {% if post.text %}
-                    <div class="lu-post-text">
-                        {{ post.text|linebreaks }}
-                    </div>
-                {% endif %}
-
-                {% if post.image %}
-                    <div class="lu-media">
-                        <img src="{{ post.image.url }}"
-                             alt="Фото публікації">
-                    </div>
-                {% endif %}
-
-                {% if post.video %}
-                    <div class="lu-media">
-                        <video controls preload="metadata">
-                            <source src="{{ post.video.url }}">
-                            Твій браузер не підтримує відео.
-                        </video>
-                    </div>
-                {% endif %}
-
-                {% if post.link %}
-                    <a class="lu-post-link"
-                       href="{{ post.link }}"
-                       target="_blank"
-                       rel="noopener noreferrer">
-                        🔗 {{ post.link }}
-                    </a>
-                {% endif %}
-            {% endif %}
-
-            <div class="lu-statistics">
-                <span>💙 {{ post.likes.count }} вподобань</span>
-                <a href="{% url 'post_detail' post.pk %}">
-                    💬 {{ post.comments.count }} коментарів
-                </a>
-            </div>
-
-            <div class="lu-actions">
-                {% if user.is_authenticated %}
-                    <form action="{% url 'post_like' post.pk %}"
-                          method="post">
-                        {% csrf_token %}
-                        <button class="lu-action" type="submit">
-                            ♡ Подобається
-                        </button>
-                    </form>
-
-                    <a class="lu-action"
-                       href="{% url 'post_detail' post.pk %}">
-                        💬 Коментувати
-                    </a>
-
-                    <form action="{% url 'post_share' post.pk %}"
-                          method="post">
-                        {% csrf_token %}
-                        <button class="lu-action" type="submit">
-                            ↗ Поширити
-                        </button>
-                    </form>
-                {% else %}
-                    <a class="lu-action"
-                       href="{% url 'post_detail' post.pk %}">
-                        Переглянути пост
-                    </a>
-                {% endif %}
-            </div>
-
-        </article>
-        {% empty %}
-            <section class="lu-empty">
-                <div class="lu-empty-icon">💬</div>
-                <h2>Тут поки порожньо</h2>
-                <p>
-                    Опублікуй перший пост або додай друзів,
-                    щоб побачити їхні публікації.
-                </p>
-            </section>
-        {% endfor %}
-
-    </main>
-
-    <aside class="lu-rightbar">
-        <section class="lu-widget">
-            <h3>Популярні користувачі</h3>
-            <p>Поки немає рекомендацій</p>
-        </section>
-
-        <section class="lu-widget">
-            <h3>Популярні групи</h3>
-            <p>Груп ще немає</p>
-        </section>
-
-        <section class="lu-widget">
-            <h3>Найближчі події</h3>
-            <p>Подій поки немає</p>
-        </section>
-    </aside>
-
-</div>
 {% endblock %}

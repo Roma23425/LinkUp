@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block layout %}
+
+
+<div class="lu-layout">
+
+    <aside class="lu-sidebar">
+        <nav class="lu-navigation">
+            <a href="{% url 'home' %}" class="lu-nav {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Головна</a>            
+            <a href="{% url 'post_list' %}" class="lu-nav {% if request.resolver_match.url_name == 'post_list' %}active{% endif %}">Стрічка</a>
+            <a href="#" class="lu-nav">Друзі та підписки</a>
+            <a href="#" class="lu-nav">Групи</a>
+            <a href="#" class="lu-nav">Повідомлення</a>
+            <a href="#" class="lu-nav">Сповіщення</a>
+            <a href="#" class="lu-nav">Відгуки</a>
+            {% if user.is_staff %}
+                <a href="/admin/" class="lu-nav">⚙ Адмін-панель</a>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <main class="lu-feed">
+        {% if messages %}
+        <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <aside class="lu-rightbar">
+        <section class="lu-widget">
+            <h3>Популярні користувачі</h3>
+            <p>Поки немає рекомендацій</p>
+        </section>
+
+        <section class="lu-widget">
+            <h3>Популярні групи</h3>
+            <p>Груп ще немає</p>
+        </section>
+
+        <section class="lu-widget">
+            <h3>Найближчі події</h3>
+            <p>Подій поки немає</p>
+        </section>
+    </aside>
+
+</div>
+
+{% endblock %}

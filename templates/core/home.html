@@ -1,32 +1,15 @@
-{% extends "base.html" %}
+{% extends "base_content.html" %}
 
 {% block title %}LinkUp — головна{% endblock %}
 
 {% block content %}
-<div class="layout">
-
-  <!-- Ліва колонка -->
-  <aside class="side-left">
-    <nav class="menu">
-      <a class="active" href="{% url 'home' %}">Стрічка</a>
-      <a href="#">Друзі та підписки</a>
-      <a href="#">Групи</a>
-      <a href="#">Повідомлення</a>
-      <a href="#">Сповіщення</a>
-      <a href="#">Відгуки</a>
-      {% if user.is_staff %}<a href="{% url 'admin:index' %}">Адмін-панель</a>{% endif %}
-    </nav>
-  </aside>
-
-  <!-- Стрічка -->
-  <main class="feed">
 
     {% if user.is_authenticated %}
     <form class="composer card" action="{% url 'post_create' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       {% if user.avatar %}<img class="ava" src="{{ user.avatar.url }}" alt="">{% else %}<span class="ava">{{ user.username|slice:":1"|upper }}</span>{% endif %}
       <div class="composer-body">
-        <textarea name="text" rows="2" placeholder="Чим хочете поділитися?"></textarea>
+        <textarea name="text" rows="10" placeholder="Чим хочете поділитися?"></textarea>
         <input class="composer-link" type="url" name="link" placeholder="Посилання (необов'язково)">
         <div class="composer-row">
           <div class="composer-files">
@@ -37,6 +20,25 @@
         </div>
       </div>
     </form>
+    <!-- <section class="lu-create">
+    <div class="lu-avatar">
+        {{ user.username|first|upper|default:"L" }}
+    </div>
+    <div class="lu-create-body">
+        <h3>Що нового?</h3>
+        <p>Поділися думками, фотографіями та відео.</p>
+
+                <form action="{% url 'post_create' %}"
+                        method="post"
+                        enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ post_form.as_p }}
+                    <button class="lu-primary" type="submit">
+                        Опублікувати
+                    </button>
+                </form>
+    </div>
+</section> -->
     {% else %}
     <section class="hero card">
       <h1>Знаходьте своїх людей</h1>
@@ -48,50 +50,4 @@
     </section>
     {% endif %}
 
-    {% for post in posts %}
-      {% include "posts/_post_card.html" %}
-    {% empty %}
-    <div class="empty card">
-      <h2>Тут поки порожньо</h2>
-      <p>Опублікуйте перший пост або додайте друзів, щоб побачити їхні публікації.</p>
-    </div>
-    {% endfor %}
-  </main>
-
-  <!-- Права колонка -->
-  <aside class="side-right">
-    <section class="card widget">
-      <h3>Популярні користувачі</h3>
-      {% for u in popular_users %}
-      <div class="row">
-        {% if u.avatar %}<img class="ava" src="{{ u.avatar.url }}" alt="">{% else %}<span class="ava">{{ u.username|slice:":1"|upper }}</span>{% endif %}
-        <span class="row-title">{{ u.username }}</span>
-        <a class="btn btn-small" href="#">Стежити</a>
-      </div>
-      {% empty %}<p class="muted">Поки немає рекомендацій</p>{% endfor %}
-    </section>
-
-    <section class="card widget">
-      <h3>Популярні групи</h3>
-      {% for g in popular_groups %}
-      <div class="row">
-        <span class="ava square">{{ g.name|slice:":1"|upper }}</span>
-        <span class="row-title">{{ g.name }}</span>
-        <a class="btn btn-small" href="#">Вступити</a>
-      </div>
-      {% empty %}<p class="muted">Груп ще немає</p>{% endfor %}
-    </section>
-
-    <section class="card widget">
-      <h3>Найближчі події</h3>
-      {% for e in events %}
-      <div class="row">
-        <span class="date">{{ e.date|date:"d.m" }}</span>
-        <span class="row-title">{{ e.title }}</span>
-      </div>
-      {% empty %}<p class="muted">Подій поки немає</p>{% endfor %}
-    </section>
-  </aside>
-
-</div>
 {% endblock %}

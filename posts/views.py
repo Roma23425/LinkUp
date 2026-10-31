@@ -35,7 +35,7 @@ def post_create(request):
         for errors in form.errors.values():
             for error in errors:
                 messages.error(request, error)
-    return redirect("home")
+    return redirect("post_list")
 
 
 def post_detail(request, pk):

@@ -107,7 +107,7 @@ h1, h2, h3, .logo { font-family: "Bricolage Grotesque", "Manrope", sans-serif; }
 .muted { color: var(--muted); font-size: 13px; }
 
 /* ---------- Повідомлення Django ---------- */
-.messages { max-width: 620px; margin: 16px auto 0; padding: 0 24px; display: flex; flex-direction: column; gap: 8px; }
+.messages { max-width: 620px; margin: 16px auto; padding: 0 24px; display: flex; flex-direction: column; gap: 8px; }
 .message { padding: 12px 16px; border-radius: 14px; background: var(--brand-soft); color: var(--brand-dark); font-weight: 600; font-size: 14px; }
 .message.error { background: color-mix(in srgb, var(--like) 14%, transparent); color: var(--like); }
 .message.success { background: color-mix(in srgb, #1fb36b 16%, transparent); color: #168a52; }
