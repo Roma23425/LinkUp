@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
@@ -55,7 +55,10 @@ def post_like(request, pk):
     like, created = Like.objects.get_or_create(user=request.user, post=post)
     if not created:
         like.delete()
-    return _back(request)
+    return JsonResponse({
+        "liked": created,
+        "likes_count": post.likes.count()
+    })
 
 
 @login_required

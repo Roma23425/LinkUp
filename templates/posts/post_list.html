@@ -11,124 +11,7 @@
 
 
 {% for post in posts %}
-<article class="lu-post">
-
-    {% if post.shared_from %}
-        <div class="lu-shared-label">↗ Поширена публікація</div>
-    {% endif %}
-
-    <header class="lu-post-header">
-        <div class="lu-avatar">
-            {{ post.author.username|first|upper|default:"L" }}
-        </div>
-
-        <div class="lu-author-info">
-            <strong>{{ post.author.username }}</strong>
-            <span>{{ post.created_at|date:"d.m.Y, H:i" }}</span>
-        </div>
-
-        {% if user.is_authenticated %}
-            {% if user == post.author or user.is_staff %}
-                <form action="{% url 'post_delete' post.pk %}"
-                        method="post"
-                        class="lu-delete-form"
-                        onsubmit="return confirm('Видалити публікацію?')">
-                    {% csrf_token %}
-                    <button class="lu-more" type="submit"
-                            title="Видалити">⋯</button>
-                </form>
-            {% endif %}
-        {% endif %}
-    </header>
-
-    {% if post.shared_from %}
-        <div class="lu-shared-content">
-            <strong>{{ post.shared_from.author.username }}</strong>
-            <div>{{ post.shared_from.text|linebreaks }}</div>
-
-            {% if post.shared_from.image %}
-                <img src="{{ post.shared_from.image.url }}"
-                        alt="Фото поширеної публікації">
-            {% endif %}
-
-            {% if post.shared_from.link %}
-                <a href="{{ post.shared_from.link }}"
-                    target="_blank" rel="noopener noreferrer">
-                    {{ post.shared_from.link }}
-                </a>
-            {% endif %}
-        </div>
-    {% else %}
-        {% if post.text %}
-            <div class="lu-post-text">
-                {{ post.text|linebreaks }}
-            </div>
-        {% endif %}
-
-        {% if post.image %}
-            <div class="lu-media">
-                <img src="{{ post.image.url }}"
-                        alt="Фото публікації">
-            </div>
-        {% endif %}
-
-        {% if post.video %}
-            <div class="lu-media">
-                <video controls preload="metadata">
-                    <source src="{{ post.video.url }}">
-                    Твій браузер не підтримує відео.
-                </video>
-            </div>
-        {% endif %}
-
-        {% if post.link %}
-            <a class="lu-post-link"
-                href="{{ post.link }}"
-                target="_blank"
-                rel="noopener noreferrer">
-                🔗 {{ post.link }}
-            </a>
-        {% endif %}
-    {% endif %}
-
-    <div class="lu-statistics">
-        <span>💙 {{ post.likes.count }} вподобань</span>
-        <a href="{% url 'post_detail' post.pk %}">
-            💬 {{ post.comments.count }} коментарів
-        </a>
-    </div>
-
-    <div class="lu-actions">
-        {% if user.is_authenticated %}
-            <form action="{% url 'post_like' post.pk %}"
-                    method="post">
-                {% csrf_token %}
-                <button class="lu-action" type="submit">
-                    ♡ Подобається
-                </button>
-            </form>
-
-            <a class="lu-action"
-                href="{% url 'post_detail' post.pk %}">
-                💬 Коментувати
-            </a>
-
-            <form action="{% url 'post_share' post.pk %}"
-                    method="post">
-                {% csrf_token %}
-                <button class="lu-action" type="submit">
-                    ↗ Поширити
-                </button>
-            </form>
-        {% else %}
-            <a class="lu-action"
-                href="{% url 'post_detail' post.pk %}">
-                Переглянути пост
-            </a>
-        {% endif %}
-    </div>
-
-</article>
+{% include "posts/post_card.html" %}
 {% empty %}
     <section class="lu-empty">
         <div class="lu-empty-icon">💬</div>
@@ -140,5 +23,42 @@
     </section>
 {% endfor %}
 
+<script>
+document.addEventListener("click", async function(e) {
 
+    const button = e.target.closest(".like-btn");
+
+    if (!button) return;
+
+    e.preventDefault();
+
+    try {
+        const response = await fetch(button.dataset.url, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Помилка сервера");
+        }
+
+        const data = await response.json();
+
+        button.innerHTML = data.liked
+            ? "❤️ Подобається"
+            : "♡ Подобається";
+
+        const post = button.closest(".lu-post");
+
+        post.querySelector(".likes-count").textContent =
+            data.likes_count;
+
+    } catch (error) {
+        console.error(error);
+    }
+});
+</script>
 {% endblock %}

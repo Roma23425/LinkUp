@@ -33,4 +33,43 @@
     {% endif %}
   </section>
 </div>
+
+<script>
+document.addEventListener("click", async function(e) {
+
+    const button = e.target.closest(".like-btn");
+
+    if (!button) return;
+
+    e.preventDefault();
+
+    try {
+        const response = await fetch(button.dataset.url, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Помилка сервера");
+        }
+
+        const data = await response.json();
+
+        button.innerHTML = data.liked
+            ? "❤️ Подобається"
+            : "♡ Подобається";
+
+        const post = button.closest(".lu-post");
+
+        post.querySelector(".likes-count").textContent =
+            data.likes_count;
+
+    } catch (error) {
+        console.error(error);
+    }
+});
+</script>
 {% endblock %}

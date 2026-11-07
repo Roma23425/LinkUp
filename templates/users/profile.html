@@ -1,42 +1,85 @@
+
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block title %}
-    Профіль — {{ profile_user.username }}
+Профіль — {{ profile_user.username }}
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block layout %}
 
-<div class="profile">
+<div class="profile-page">
 
-    {% if profile_user.avatar %}
+    <div class="profile-card">
 
-        <img
-            src="{{ profile_user.avatar.url }}"
-            alt="Avatar"
-            class="avatar"
-        >
+        <!-- Обкладинка профілю -->
+        <div class="profile-cover"
+             {% if profile_user.cover %}
+             style="background-image: url('{{ profile_user.cover.url }}');"
+             {% endif %}>
+        </div>
 
-    {% endif %}
+        <!-- Інформація профілю -->
+        <div class="profile-content">
 
-    <h1>
-        {{ profile_user.username }}
-    </h1>
+            <div class="profile-top">
 
-    <p>
-        {{ profile_user.first_name }}
-        {{ profile_user.last_name }}
-    </p>
+                <div class="profile-avatar">
+                    {% if profile_user.avatar %}
+                        <img src="{{ profile_user.avatar.url }}"
+                             alt="Avatar">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ profile_user.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                </div>
 
-    <p>
-        {{ profile_user.bio }}
-    </p>
+                <a href="{% url 'edit_profile' %}"
+                   class="edit-profile-btn">
+                    ✎ Редагувати профіль
+                </a>
 
-    <a
-        href="{% url 'edit_profile' %}"
-        class="button"
-    >
-        Редагувати профіль
-    </a>
+            </div>
+
+            <div class="profile-info">
+
+                <h1>{{ profile_user.username }}</h1>
+
+                <p class="profile-fullname">
+                    {{ profile_user.first_name }}
+                    {{ profile_user.last_name }}
+                </p>
+
+                {% if profile_user.bio %}
+                    <p class="profile-bio">
+                        {{ profile_user.bio }}
+                    </p>
+                {% else %}
+                    <p class="profile-bio muted">
+                        Користувач ще не додав опис профілю.
+                    </p>
+                {% endif %}
+
+            </div>
+
+            <div class="profile-divider"></div>
+
+            <div class="profile-posts" id="posts">
+                <div class="empty-profile">
+                    <div class="empty-icon">✦</div>
+                    <h3>Поки що немає публікацій</h3>
+                    <p>Тут з'являтимуться твої публікації.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
 </div>
 
